@@ -146,6 +146,7 @@ public class BPlusTree {
         LockUtil.ensureSufficientLockHeld(lockContext, LockType.NL);
 
         // TODO(proj2): implement
+        // done
         int order = metadata.getOrder();
         return this.root.get(key).getKey(key);
     }
@@ -202,6 +203,7 @@ public class BPlusTree {
         LockUtil.ensureSufficientLockHeld(lockContext, LockType.NL);
 
         // TODO(proj2): Return a BPlusTreeIterator.
+        // done
         return new BPlusTreeIterator(root.getLeftmostLeaf());
     }
 
@@ -234,8 +236,8 @@ public class BPlusTree {
         LockUtil.ensureSufficientLockHeld(lockContext, LockType.NL);
 
         // TODO(proj2): Return a BPlusTreeIterator.
-
-        return Collections.emptyIterator();
+        // done
+        return new BPlusTreeIterator(key, this.root.get(key));
     }
 
     /**
@@ -253,6 +255,7 @@ public class BPlusTree {
         LockUtil.ensureSufficientLockHeld(lockContext, LockType.NL);
 
         // TODO(proj2): implement
+        // done
         // Note: You should NOT update the root variable directly.
         // Use the provided updateRoot() helper method to change
         // the tree's root if the old root splits.
@@ -441,6 +444,11 @@ public class BPlusTree {
         public BPlusTreeIterator(LeafNode leftMostLeaf) {
             currentNode = leftMostLeaf;
             currentItr = leftMostLeaf.scanAll();
+        }
+
+        public BPlusTreeIterator(DataBox key, LeafNode leafNode) {
+            currentNode = leafNode;
+            currentItr = leafNode.scanGreaterEqual(key);
         }
 
         @Override
