@@ -202,17 +202,7 @@ public class BPlusTree {
         LockUtil.ensureSufficientLockHeld(lockContext, LockType.NL);
 
         // TODO(proj2): Return a BPlusTreeIterator.
-
-        LeafNode leftNode = root.getLeftmostLeaf();
-        //Long pageNm = leftNode.getPage().getPageNum();
-
-        List<RecordId> recordIds = new ArrayList<>(leftNode.getRids());
-        while (leftNode.getRightSibling().isPresent()) {
-            recordIds.addAll(leftNode.getRightSibling().get().getRids());
-            leftNode = leftNode.getRightSibling().get();
-        }
-
-        return new BPlusTreeIterator(recordIds);
+        return new BPlusTreeIterator(root.getLeftmostLeaf());
     }
 
     /**
@@ -444,29 +434,37 @@ public class BPlusTree {
     private class BPlusTreeIterator implements Iterator<RecordId> {
         // TODO(proj2): Add whatever fields and constructors you want here.
         // done
-        private List<RecordId> recordIds;
-        private int index;
+        private LeafNode currentNode;
 
-        public BPlusTreeIterator(List<RecordId> recordIds) {
-            this.recordIds = recordIds;
-            this.index = 0;
+        private Iterator<RecordId> currentItr;
+
+        public BPlusTreeIterator(LeafNode leftMostLeaf) {
+            currentNode = leftMostLeaf;
+            currentItr = leftMostLeaf.scanAll();
         }
 
         @Override
         public boolean hasNext() {
             // TODO(proj2): implement
             // done
-            return index < recordIds.size();
+            if (currentItr.hasNext()) return true;
+            else {
+                Optional<LeafNode> nextLeaf = currentNode.getRightSibling();
+                if (nextLeaf.isPresent()) {
+                    currentNode = nextLeaf.get();
+                    currentItr = currentNode.scanAll();
+                    return true;
+                }
+                return false;
+            }
         }
 
         @Override
         public RecordId next() {
             // TODO(proj2): implement
             // done
-            if (hasNext()) {
-                RecordId recordId = recordIds.get(index);
-                index++;
-                return recordId;
+            if (currentItr.hasNext()) {
+                return currentItr.next();
             }
             else throw new NoSuchElementException();
         }
