@@ -4,7 +4,7 @@
 
 ## Overview
 
-This repo contains my implementation for CS186 RookieDB projects. There is a [gitbook](https://cs186.gitbook.io/project/) for CS186 projects, but it may be updated each semester, so I cloned the 2021 spring version. You can find the projects handout that I used [here](./project-handout).
+This repo contains my implementation for CS186 RookieDB projects. There is a [gitbook](https://cs186.gitbook.io/project/) for CS186 projects. You can find the projects handout that I used [here](./project-handout).
 
 The master branch contains a bare-bones database implementation, which supports
 executing simple transactions in series. This is the skeleton code you will use throughout the projects. In the assignments of
@@ -18,7 +18,7 @@ My implementation for each project is in the corresponding branch as follows (yo
 
 | **Assignment**                                                                                | **Branch name** |
 |-----------------------------------------------------------------------------------------------|---------------------|
-| Skeleton code                                                | Master          |
+| Working progress                                                | Master          |
 | [Project 2: B+ Trees](https://cs186.gitbook.io/project/assignments/proj2)                     | b_plus_tree |
 | [Project 3: Joins and Query Optimization](https://cs186.gitbook.io/project/assignments/proj3) | join_query_opt |
 | [Project 4: Concurrency](https://cs186.gitbook.io/project/assignments/proj4)                  | concurrency |
