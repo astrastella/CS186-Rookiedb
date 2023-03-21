@@ -319,7 +319,8 @@ public class BPlusTree {
         LockUtil.ensureSufficientLockHeld(lockContext, LockType.NL);
 
         // TODO(proj2): implement
-
+        // done
+        root.remove(key);
         return;
     }
 
