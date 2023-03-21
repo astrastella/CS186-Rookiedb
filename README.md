@@ -1,7 +1,5 @@
 # RookieDB
 
-![The official unofficial mascot of the class projects](images/derpydb-small.jpg)
-
 ## Overview
 
 This repo contains my implementation for CS186 RookieDB projects. There is a [gitbook](https://cs186.gitbook.io/project/) for CS186 projects. You can find the projects handout that I used [here](./project-handout).
