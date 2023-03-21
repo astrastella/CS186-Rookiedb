@@ -203,7 +203,16 @@ public class BPlusTree {
 
         // TODO(proj2): Return a BPlusTreeIterator.
 
-        return Collections.emptyIterator();
+        LeafNode leftNode = root.getLeftmostLeaf();
+        //Long pageNm = leftNode.getPage().getPageNum();
+
+        List<RecordId> recordIds = new ArrayList<>(leftNode.getRids());
+        while (leftNode.getRightSibling().isPresent()) {
+            recordIds.addAll(leftNode.getRightSibling().get().getRids());
+            leftNode = leftNode.getRightSibling().get();
+        }
+
+        return new BPlusTreeIterator(recordIds);
     }
 
     /**
@@ -434,19 +443,32 @@ public class BPlusTree {
     // Iterator ////////////////////////////////////////////////////////////////
     private class BPlusTreeIterator implements Iterator<RecordId> {
         // TODO(proj2): Add whatever fields and constructors you want here.
+        // done
+        private List<RecordId> recordIds;
+        private int index;
+
+        public BPlusTreeIterator(List<RecordId> recordIds) {
+            this.recordIds = recordIds;
+            this.index = 0;
+        }
 
         @Override
         public boolean hasNext() {
             // TODO(proj2): implement
-
-            return false;
+            // done
+            return index < recordIds.size();
         }
 
         @Override
         public RecordId next() {
             // TODO(proj2): implement
-
-            throw new NoSuchElementException();
+            // done
+            if (hasNext()) {
+                RecordId recordId = recordIds.get(index);
+                index++;
+                return recordId;
+            }
+            else throw new NoSuchElementException();
         }
     }
 }

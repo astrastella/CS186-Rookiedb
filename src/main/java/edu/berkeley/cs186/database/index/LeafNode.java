@@ -176,13 +176,12 @@ class LeafNode extends BPlusNode {
             List<RecordId> newRids = new ArrayList<>(rids.subList(order, 2*order+1));
             keys = keys.subList(0, order);
             rids = rids.subList(0, order);
-            sync();
             //LeafNode newLeaf = new LeafNode(metadata, bufferManager, newKeys, newRids, rightSibling, treeContext);
             Page newPage = bufferManager.fetchNewPage(treeContext,
                     metadata.getPartNum());
             LeafNode newLeaf = new LeafNode(metadata, bufferManager, newPage, newKeys, newRids, rightSibling, treeContext);
-            this.rightSibling = Optional.of(newLeaf.getPage().getPageNum());
-            //sync();
+            this.rightSibling = Optional.of(newPage.getPageNum());
+            sync();
             return Optional.of(new Pair<>(newKeys.get(0), newPage.getPageNum())); //newRids.get(0).getPageNum()));
         }
 
