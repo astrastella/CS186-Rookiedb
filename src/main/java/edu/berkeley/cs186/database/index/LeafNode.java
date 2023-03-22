@@ -12,6 +12,8 @@ import edu.berkeley.cs186.database.table.RecordId;
 import java.nio.ByteBuffer;
 import java.util.*;
 
+import static java.lang.Math.ceil;
+
 /**
  * A leaf of a B+ tree. Every leaf in a B+ tree of order d stores between d and
  * 2d (key, record id) pairs and a pointer to its right sibling (i.e. the page
@@ -177,11 +179,11 @@ class LeafNode extends BPlusNode {
             keys = keys.subList(0, order);
             rids = rids.subList(0, order);
             //LeafNode newLeaf = new LeafNode(metadata, bufferManager, newKeys, newRids, rightSibling, treeContext);
-            Page newPage = bufferManager.fetchNewPage(treeContext,
-                    metadata.getPartNum());
+            Page newPage = bufferManager.fetchNewPage(treeContext, metadata.getPartNum());
             LeafNode newLeaf = new LeafNode(metadata, bufferManager, newPage, newKeys, newRids, rightSibling, treeContext);
             this.rightSibling = Optional.of(newPage.getPageNum());
             sync();
+            // return the split key, page number of the split key
             return Optional.of(new Pair<>(newKeys.get(0), newPage.getPageNum())); //newRids.get(0).getPageNum()));
         }
 
@@ -195,7 +197,35 @@ class LeafNode extends BPlusNode {
     public Optional<Pair<DataBox, Long>> bulkLoad(Iterator<Pair<DataBox, RecordId>> data,
             float fillFactor) {
         // TODO(proj2): implement
+        // done
 
+        int capacity = (int) ceil(metadata.getOrder()*2*fillFactor); //round up
+        // load up to capacity of the leaf node
+        // i starts from keys.size() since it can be already populated with a key due to split leaf node
+        for (int i = keys.size(); i < capacity; i++) {
+            if (data.hasNext()) {
+                Pair<DataBox, RecordId> nextData = data.next();
+                // no checking for duplication
+                keys.add(nextData.getFirst());
+                rids.add(nextData.getSecond());
+            }
+        }
+
+        // split leaf node
+        if (data.hasNext()) {
+            Pair<DataBox, RecordId> nextData = data.next();
+            List<DataBox> newKeys = new ArrayList<>();
+            newKeys.add(nextData.getFirst());
+            List<RecordId> newRids = new ArrayList<>();
+            newRids.add(nextData.getSecond());
+            Page newPage = bufferManager.fetchNewPage(treeContext, metadata.getPartNum());
+            LeafNode newLeaf = new LeafNode(metadata, bufferManager, newPage, newKeys, newRids, rightSibling, treeContext);
+            this.rightSibling = Optional.of(newPage.getPageNum());
+            sync();
+            return Optional.of(new Pair<>(nextData.getFirst(), newPage.getPageNum())); // return the split key, page number of the split key
+        }
+
+        sync();
         return Optional.empty();
     }
 

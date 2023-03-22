@@ -11,6 +11,7 @@ import edu.berkeley.cs186.database.io.DiskSpaceManager;
 import edu.berkeley.cs186.database.memory.BufferManager;
 import edu.berkeley.cs186.database.table.RecordId;
 
+import javax.swing.text.html.Option;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -297,10 +298,26 @@ public class BPlusTree {
         LockUtil.ensureSufficientLockHeld(lockContext, LockType.NL);
 
         // TODO(proj2): implement
+        // done
         // Note: You should NOT update the root variable directly.
         // Use the provided updateRoot() helper method to change
         // the tree's root if the old root splits.
+        LeafNode leftNode = root.getLeftmostLeaf();
+        if (leftNode.getKeys().size() != 0 || leftNode.getRids().size() != 0)
+            throw new BPlusTreeException("Leaf node needs to be empty for bulkLoad");
 
+        Optional<Pair<DataBox, Long>> result = root.bulkLoad(data, fillFactor);
+        if (result.isPresent()) {
+            List<DataBox> newKeys = new ArrayList<>();
+            newKeys.add(result.get().getFirst());
+            List<Long> newChildren = new ArrayList<>();
+            newChildren.add(root.getPage().getPageNum());
+            newChildren.add(result.get().getSecond());
+            InnerNode newRoot = new InnerNode(metadata, bufferManager, newKeys, newChildren, lockContext);
+            updateRoot(newRoot);
+            if (data.hasNext()) newRoot.bulkLoad(data, fillFactor);
+        }
+        // else: Optional.Empty is returned meaning all data has been filled
         return;
     }
 
