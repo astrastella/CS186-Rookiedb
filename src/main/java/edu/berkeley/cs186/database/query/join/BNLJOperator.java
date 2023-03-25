@@ -87,6 +87,12 @@ public class BNLJOperator extends JoinOperator {
          */
         private void fetchNextLeftBlock() {
             // TODO(proj3_part1): implement
+            if (leftSourceIterator.hasNext()) {
+                leftBlockIterator = QueryOperator.getBlockIterator(leftSourceIterator,
+                        getSchema(), numBuffers-2);
+                leftBlockIterator.markNext();
+                leftRecord = leftBlockIterator.next();
+            }
         }
 
         /**
@@ -101,6 +107,11 @@ public class BNLJOperator extends JoinOperator {
          */
         private void fetchNextRightPage() {
             // TODO(proj3_part1): implement
+            if (rightSourceIterator.hasNext()) {
+                rightPageIterator = QueryOperator.getBlockIterator(rightSourceIterator,
+                        getSchema(), 1);
+                rightPageIterator.markNext();
+            }
         }
 
         /**
@@ -113,7 +124,37 @@ public class BNLJOperator extends JoinOperator {
          */
         private Record fetchNextRecord() {
             // TODO(proj3_part1): implement
-            return null;
+            if (leftRecord == null) {
+                // The left source was empty, nothing to fetch
+                return null;
+            }
+            while(true) {
+                if (rightPageIterator.hasNext()) {
+                    Record rightRecord = rightPageIterator.next();
+                    if (compare(leftRecord, rightRecord) == 0) {
+                        return leftRecord.concat(rightRecord);
+                    }
+                }
+                // reached the end of a row in a block
+                else if (leftBlockIterator.hasNext()) {
+                    rightPageIterator.reset();
+                    leftRecord = leftBlockIterator.next();
+                }
+                // reached the end in a block
+                else if (rightSourceIterator.hasNext()) {
+                    leftBlockIterator.reset();
+                    leftRecord = leftBlockIterator.next();
+                    fetchNextRightPage();
+                }
+                // reached the end of rows of blocks but there are more blocks
+                else if (leftSourceIterator.hasNext()) {
+                    fetchNextLeftBlock(); // left record automatically reset
+                    rightPageIterator.reset();
+                }
+                else {
+                    return null;
+                }
+            }
         }
 
         /**
